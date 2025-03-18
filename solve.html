@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solve Quadratic Equation</title>
+    <script>
+        function solveQuadratic() {
+            // (1) call prompt function for three times to get coefficient a, b and c from user
+            var a = parseFloat(prompt("Enter coefficient a:"));
+            var b = parseFloat(prompt("Enter coefficient b:"));
+            var c = parseFloat(prompt("Enter coefficient c:"));
+
+            // (2) convert them into number by using parse
+            // (This step is not necessary as parseFloat already converts the input to a number)
+
+            // (3) compute delta = b*b - 4*a*c; (we assume delta >=0, a > 0)
+            var delta = b * b - 4 * a * c;
+
+            // (4) compute x1 = (-b + Math.sqrt(delta)) / (2 * a);
+            // x2 = (-b - Math.sqrt(delta)) / (2 * a);
+            var x1, x2;
+            if (delta >= 0) {
+                x1 = (-b + Math.sqrt(delta)) / (2 * a);
+                x2 = (-b - Math.sqrt(delta)) / (2 * a);
+            } else {
+                alert("No real roots exist for the given coefficients.");
+                return;
+            }
+
+            // (5) using alert to tell user x1 and x2
+            alert("The roots are: x1 = " + x1 + ", x2 = " + x2);
+
+            // (6) tell user the same results using console.log
+            console.log("The roots are: x1 = " + x1 + ", x2 = " + x2);
+        }
+    </script>
+</head>
+<body>
+    <button onclick="solveQuadratic()">Solve Quadratic Equation</button>
+</body>
+</html>
