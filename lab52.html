@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balloon Animation</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="balloonCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('balloonCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let balloons = [];
+
+        // 创建10个气球
+        for (let i = 0; i < 10; i++) {
+            let balloon = {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 50 + 20, // 随机大小
+                color: getRandomColor(), // 随机颜色
+                speedX: (Math.random() - 0.5) * 4,
+                speedY: (Math.random() - 0.5) * 4
+            };
+            balloons.push(balloon);
+        }
+
+        function getRandomColor() {
+            let letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function updateBalloons() {
+            balloons.forEach(balloon => {
+                // 更新位置
+                balloon.x += balloon.speedX;
+                balloon.y += balloon.speedY;
+
+                // 调整大小
+                balloon.size += (Math.random() - 0.5) * 2;
+                if (balloon.size < 20) balloon.size = 20; // 最小大小
+                if (balloon.size > 70) balloon.size = 70; // 最大大小
+
+                // 更改颜色
+                if (Math.random() < 0.1) {
+                    balloon.color = getRandomColor();
+                }
+
+                // 边界检查
+                if (balloon.x < 0 || balloon.x > canvas.width) balloon.speedX *= -1;
+                if (balloon.y < 0 || balloon.y > canvas.height) balloon.speedY *= -1;
+            });
+        }
+
+        function drawBalloons() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            balloons.forEach(balloon => {
+                ctx.beginPath();
+                ctx.arc(balloon.x, balloon.y, balloon.size, 0, Math.PI * 2);
+                ctx.fillStyle = balloon.color;
+                ctx.fill();
+                ctx.closePath();
+            });
+        }
+
+        function animate() {
+            updateBalloons();
+            drawBalloons();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // 窗口大小调整时重置画布大小
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
