@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Balloon Class Animation</title>
+    <style>
+        @keyframes fly {
+            from { top: 700px; }
+            to { top: 0px; }
+        }
+        body {
+            margin: 0;
+            height: 700px;
+            overflow: hidden;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        class Balloon {
+            constructor(id, color, diameter, speed) {
+                this.id = id;
+                this.color = color;
+                this.diameter = diameter;
+                this.speed = speed;
+            }
+
+            make() {
+                const dv = document.createElement('div');
+                dv.id = 'b' + this.id;
+                dv.style.cssText = `
+                    width: ${this.diameter}px;
+                    height: ${this.diameter}px;
+                    border-radius: ${this.diameter/2}px;
+                    background-color: ${this.color};
+                    position: absolute;
+                    left: ${this.id * 50 % window.innerWidth}px;
+                    top: 700px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: bold;
+                    text-shadow: 1px 1px 1px black;
+                `;
+                dv.textContent = this.id;
+                document.body.appendChild(dv);
+                return this;
+            }
+
+            rise() {
+                const dv = document.getElementById('b' + this.id);
+                dv.style.animationName = "fly";
+                dv.style.animationDuration = `${Math.floor(700/this.speed)}s`;
+                return this;
+            }
+        }
+
+        // Create 100 random balloons
+        for (let i = 0; i < 100; i++) {
+            const r = Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0');
+            const s = Math.random() * 200 + 50; // Speed between 50-250
+            const w = Math.random() * 200 + 30; // Width between 30-230
+            
+            new Balloon(
+                i,
+                `#${r}`,
+                w,
+                s
+            ).make().rise();
+        }
+    </script>
+</body>
+</html>
