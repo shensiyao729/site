@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Balloon Animation with Growth and Burst</title>
+<style>
+  @keyframes rise {
+    0% { 
+      top: 700px;
+      width: var(--start-size);
+      height: var(--start-size);
+    }
+    100% { 
+      top: 0px;
+      width: calc(var(--start-size) * 1.5);
+      height: calc(var(--start-size) * 1.5);
+    }
+  }
+  
+  body {
+    margin: 0;
+    height: 700px;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+  }
+  
+  .balloon {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease-out;
+  }
+  
+  .balloon::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    width: 2px;
+    height: 50px;
+    background: rgba(0,0,0,0.2);
+  }
+  
+  @keyframes burst {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.8); opacity: 0.8; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+  
+  .burst {
+    animation: burst 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+</style>
+</head>
+<body>
+<script>
+  // Configuration
+  const COLORS = ['#FF0000', '#FFA500', '#FFFF00', '#008000', '#000000', '#0000FF', '#800080'];
+  const BURST_HEIGHT = 150; // Height at which balloons start bursting (px from top)
+  const BALLOON_COUNT = 50;
+  const MIN_SIZE = 40;
+  const MAX_SIZE = 80;
+  const MIN_SPEED = 2;
+  const MAX_SPEED = 6;
+  
+  class Balloon {
+    constructor(id) {
+      this.id = id;
+      this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.size = Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE;
+      this.speed = Math.random() * (MAX_SPEED - MIN_SPEED) + MIN_SPEED;
+      this.startX = Math.random() * (window.innerWidth - this.size);
+      this.burstDelay = Math.random() * 2000; // Random delay before bursting
+      this.element = null;
+      this.rising = false;
+    }
+    
+    create() {
+      const balloon = document.createElement('div');
+      balloon.className = 'balloon';
+      balloon.id = `balloon-${this.id}`;
+      balloon.style.setProperty('--start-size', `${this.size}px`);
+      balloon.style.width = `${this.size}px`;
+      balloon.style.height = `${this.size}px`;
+      balloon.style.borderRadius = `${this.size / 2}px`;
+      balloon.style.backgroundColor = this.color;
+      balloon.style.left = `${this.startX}px`;
+      balloon.style.top = '700px';
+      balloon.textContent = this.id;
+      
+      document.body.appendChild(balloon);
+      this.element = balloon;
+      return this;
+    }
+    
+    launch() {
+      this.element.style.animation = `rise ${700 / (this.speed * 10)}s linear forwards`;
+      this.rising = true;
+      this.checkPosition();
+      return this;
+    }
+    
+    checkPosition() {
+      if (!this.rising) return;
+      
+      const rect = this.element.getBoundingClientRect();
+      if (rect.top <= BURST_HEIGHT) {
+        this.rising = false;
+        setTimeout(() => this.pop(), this.burstDelay);
+      } else {
+        requestAnimationFrame(() => this.checkPosition());
+      }
+    }
+    
+    pop() {
+      this.element.classList.add('burst');
+      setTimeout(() => {
+        if (this.element.parentNode) {
+          this.element.remove();
+        }
+      }, 600);
+    }
+  }
+  
+  // Create and launch balloons
+  for (let i = 0; i < BALLOON_COUNT; i++) {
+    // Stagger the balloon launches
+    setTimeout(() => {
+      new Balloon(i).create().launch();
+    }, i * 300);
+  }
+  
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    const balloons = document.querySelectorAll('.balloon');
+    balloons.forEach(balloon => {
+      const id = balloon.id.split('-')[1];
+      // Recalculate horizontal position based on new window width
+      balloon.style.left = `${Math.random() * (window.innerWidth - parseInt(balloon.style.width))}px`;
+    });
+  });
+</script>
+</body>
+</html>
