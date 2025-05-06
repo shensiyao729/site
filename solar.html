@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System Simulation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: Arial, sans-serif;
+        }
+        #solar-system {
+            position: relative;
+            width: 1500px;
+            height: 800px;
+            margin: 0 auto;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #000000 100%);
+            cursor: pointer;
+        }
+        .star, .planet {
+            position: absolute;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .orbit {
+            position: absolute;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #info-table {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-collapse: collapse;
+            display: none;
+            z-index: 100;
+        }
+        #info-table th, #info-table td {
+            border: 1px solid #444;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        #info-table th {
+            background-color: #333;
+            cursor: pointer;
+        }
+        #info-table th:hover {
+            background-color: #555;
+        }
+        #info-table tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="solar-system"></div>
+    <table id="info-table">
+        <thead>
+            <tr>
+                <th data-sort="name">Name ▲</th>
+                <th data-sort="mass">Mass (kg) ▲</th>
+                <th data-sort="orbitRadius">Orbit Radius (km) ▲</th>
+                <th data-sort="color">Color ▲</th>
+                <th data-sort="diameter">Diameter (km) ▲</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <script>
+        // Solar system objects data
+        const solarSystem = [
+            { name: "Sun", mass: 1.989e30, orbitRadius: 0, color: "#ffff00", diameter: 1392700 },
+            { name: "Mercury", mass: 3.3011e23, orbitRadius: 57909050, color: "#b5b5b5", diameter: 4879 },
+            { name: "Venus", mass: 4.8675e24, orbitRadius: 108208000, color: "#e6e6e6", diameter: 12104 },
+            { name: "Earth", mass: 5.972e24, orbitRadius: 149598023, color: "#1a75ff", diameter: 12742 },
+            { name: "Mars", mass: 6.417e23, orbitRadius: 227939200, color: "#ff471a", diameter: 6779 },
+            { name: "Jupiter", mass: 1.899e27, orbitRadius: 778570000, color: "#ffcc99", diameter: 139820 },
+            { name: "Saturn", mass: 5.685e26, orbitRadius: 1433449370, color: "#e6d9ac", diameter: 116460 },
+            { name: "Uranus", mass: 8.682e25, orbitRadius: 2870658186, color: "#99ccff", diameter: 50724 },
+            { name: "Neptune", mass: 1.024e26, orbitRadius: 4498396441, color: "#4da6ff", diameter: 49244 },
+            { name: "Pluto", mass: 1.309e22, orbitRadius: 5906440628, color: "#d9d9d9", diameter: 2376 }
+        ];
+
+        // Scale factors for visualization
+        const sizeScale = 0.0001;
+        const distanceScale = 0.0000001;
+        const orbitScale = 0.5;
+
+        // Create solar system
+        const solarSystemDiv = document.getElementById('solar-system');
+        const infoTable = document.getElementById('info-table');
+        const tableBody = infoTable.querySelector('tbody');
+        let sortDirection = 1;
+        let lastSortColumn = null;
+
+        function createSolarSystem() {
+            solarSystemDiv.innerHTML = '';
+            
+            // Create star (Sun)
+            const sun = solarSystem[0];
+            const sunElement = document.createElement('div');
+            sunElement.className = 'star';
+            sunElement.style.width = `${sun.diameter * sizeScale}px`;
+            sunElement.style.height = `${sun.diameter * sizeScale}px`;
+            sunElement.style.backgroundColor = sun.color;
+            sunElement.style.left = '50%';
+            sunElement.style.top = '50%';
+            solarSystemDiv.appendChild(sunElement);
+            
+            // Create planets and their orbits
+            for (let i = 1; i < solarSystem.length; i++) {
+                const planet = solarSystem[i];
+                
+                // Create orbit path
+                const orbitElement = document.createElement('div');
+                orbitElement.className = 'orbit';
+                orbitElement.style.width = `${planet.orbitRadius * distanceScale * orbitScale * 2}px`;
+                orbitElement.style.height = `${planet.orbitRadius * distanceScale * orbitScale * 2}px`;
+                orbitElement.style.left = '50%';
+                orbitElement.style.top = '50%';
+                solarSystemDiv.appendChild(orbitElement);
+                
+                // Create planet
+                const planetElement = document.createElement('div');
+                planetElement.className = 'planet';
+                planetElement.style.width = `${planet.diameter * sizeScale}px`;
+                planetElement.style.height = `${planet.diameter * sizeScale}px`;
+                planetElement.style.backgroundColor = planet.color;
+                planetElement.style.left = '50%';
+                planetElement.style.top = '50%';
+                planetElement.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 360}deg) translate(${planet.orbitRadius * distanceScale * orbitScale}px) rotate(-${Math.random() * 360}deg)`;
+                solarSystemDiv.appendChild(planetElement);
+            }
+        }
+
+        function populateTable() {
+            tableBody.innerHTML = '';
+            solarSystem.forEach(obj => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${obj.name}</td>
+                    <td>${obj.mass.toExponential(2)}</td>
+                    <td>${obj.orbitRadius.toLocaleString()}</td>
+                    <td style="color:${obj.color}">${obj.color}</td>
+                    <td>${obj.diameter.toLocaleString()}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function sortTable(columnName) {
+            if (lastSortColumn === columnName) {
+                sortDirection *= -1;
+            } else {
+                sortDirection = 1;
+                lastSortColumn = columnName;
+            }
+            
+            // Update header arrows
+            document.querySelectorAll('#info-table th').forEach(th => {
+                th.innerHTML = th.innerHTML.replace('▲', '').replace('▼', '');
+                if (th.dataset.sort === columnName) {
+                    th.innerHTML += sortDirection === 1 ? ' ▲' : ' ▼';
+                }
+            });
+            
+            solarSystem.sort((a, b) => {
+                if (a[columnName] < b[columnName]) return -1 * sortDirection;
+                if (a[columnName] > b[columnName]) return 1 * sortDirection;
+                return 0;
+            });
+            
+            populateTable();
+        }
+
+        // Event listeners
+        solarSystemDiv.addEventListener('click', () => {
+            if (infoTable.style.display === 'none' || !infoTable.style.display) {
+                infoTable.style.display = 'table';
+                populateTable();
+            } else {
+                infoTable.style.display = 'none';
+            }
+        });
+
+        document.querySelectorAll('#info-table th').forEach(th => {
+            th.addEventListener('click', () => {
+                sortTable(th.dataset.sort);
+            });
+        });
+
+        // Initialize
+        createSolarSystem();
+    </script>
+</body>
+</html>
